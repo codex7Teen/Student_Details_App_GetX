@@ -1,59 +1,85 @@
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:student_details_getx/model/student_model.dart';
 
-ValueNotifier<List<StudentModel>> studentListNotifier = ValueNotifier([]);
+class StudentController extends GetxController {
+  
+  // Main RxList to store student data
+  var studentList = <StudentModel>[].obs;
 
-class StudentDbFunctions extends ChangeNotifier {
+  // List to store search results
+  var searchResults = <StudentModel>[].obs;
+  // To track if a search has been made
+  var hasSearched = false.obs;
+  // to track dark/white mode
+  var darkModeToggle = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Fetch data when controller initializes
+    getStudentDetails();
+  }
 
   //! Add Student
- static Future<void> addStudentDetails(StudentModel value) async {
-  final studentDb = await Hive.openBox<StudentModel>(StudentModel.boxName);
+  Future<void> addStudentDetails(StudentModel value) async {
+    final studentDb = await Hive.openBox<StudentModel>(StudentModel.boxName);
 
-  await studentDb.add(value);
+    await studentDb.add(value);
 
-  studentListNotifier.value.add(value);
+    // Automatically triggers UI update
+    studentList.add(value);
 
-  studentListNotifier.notifyListeners();
-
-  log('add success');
-}
+    log('add success');
+  }
 
 //! Get Student
- static Future<void> getStudentDetails() async {
-  final studentDb = await Hive.openBox<StudentModel>(StudentModel.boxName);
+  Future<void> getStudentDetails() async {
+    final studentDb = await Hive.openBox<StudentModel>(StudentModel.boxName);
 
-  studentListNotifier.value.clear();
+    studentList.clear();
+    // Automatically triggers UI update
+    studentList.addAll(studentDb.values);
 
-  studentListNotifier.value.addAll(studentDb.values);
-
-  studentListNotifier.notifyListeners();
-
-  log('get success');
-}
+    log('get success');
+  }
 
 //! Delete Student
- static Future<void> deleteStudent(int id) async {
-  final studentDb = await Hive.openBox<StudentModel>(StudentModel.boxName);
+  Future<void> deleteStudent(int id) async {
+    final studentDb = await Hive.openBox<StudentModel>(StudentModel.boxName);
 
-  await studentDb.delete(id);
-  await getStudentDetails();
+    await studentDb.delete(id);
+    getStudentDetails();
 
-  log('delete success');
-}
+    log('delete success');
+  }
 
 //! Update Student
- static Future<void> updateStudent(int id, StudentModel newValue) async {
-  final studentDb = await Hive.openBox<StudentModel>(StudentModel.boxName);
+  Future<void> updateStudent(int id, StudentModel newValue) async {
+    final studentDb = await Hive.openBox<StudentModel>(StudentModel.boxName);
 
-  await studentDb.put(id, newValue);
+    await studentDb.put(id, newValue);
 
-  await getStudentDetails();
+    getStudentDetails();
 
-  log('update success');
-}
+    log('update success');
+  }
 
-  
+  //! Filter Students
+  void filteredStudets(String query) {
+    final results = studentList.where((student) {
+      return student.name.contains(query.toLowerCase());
+    }).toList();
+
+    searchResults.value = results;
+    // Marking as searched
+    hasSearched.value = true;
+  }
+
+  //! Change darkmode bool
+  void changeDarkmodeBool() {
+    darkModeToggle.value = !darkModeToggle.value;
+  }
 }

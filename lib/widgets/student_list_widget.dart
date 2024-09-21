@@ -19,6 +19,10 @@ class StudentListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    //! Injecting the studentController
+    final StudentController studentController = Get.find<StudentController>();
+
     return Padding(
         padding: const EdgeInsets.all(10),
         child: ClipRRect(
@@ -43,7 +47,7 @@ class StudentListWidget extends StatelessWidget {
                     }, icon: Icon(Icons.create,color: Colors.black)),
                     IconButton(onPressed: () async {
                       //delete
-                      await StudentDbFunctions.deleteStudent(id);
+                      await studentController.deleteStudent(id);
                     }, icon: Icon(Icons.delete,color: Colors.black))
                   ],
                 ),

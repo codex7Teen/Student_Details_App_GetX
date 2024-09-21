@@ -16,28 +16,16 @@ class ScreenSearch extends StatefulWidget {
 }
 
 class _ScreenSearchState extends State<ScreenSearch> {
+  //! Inject the controller
+  final StudentController studentController = Get.find<StudentController>();
 
-  List<StudentModel> searchResults = [];
-  bool hasSearched = false;
-
-  void filteredStudets(String query) {
-    final results = studentListNotifier.value.where((student) {
-      return student.name.toLowerCase().contains(query.toLowerCase());
-    }).toList();
-
-    setState(() {
-      searchResults = results;
-      hasSearched = true;
-    });
-  }
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           iconTheme: IconThemeData(
-          color: Colors.black,
-        ),
+            color: Colors.black,
+          ),
           backgroundColor: Colors.yellow[300],
           title: Text(
             'Serach Students',
@@ -60,34 +48,43 @@ class _ScreenSearchState extends State<ScreenSearch> {
                 backgroundColor: Colors.white,
                 padding: EdgeInsets.all(10),
                 onChanged: (query) {
-                  filteredStudets(query);
+                  studentController.filteredStudets(query);
                 },
               ),
             ),
+            Expanded(child: Obx(() {
+              // if no search has been made yet
+              if (!studentController.hasSearched.value) {
+                return Center(child: Text("SEARCH FOR STUDENTS..."));
+              }
 
-            Expanded(
-              child: hasSearched ? searchResults.isNotEmpty ? ListView.builder(
-                          itemCount: searchResults.length,
-                          itemBuilder: (context, index) {
-                            //data
-                            final data = searchResults[index];
-                            return InkWell(
-                                onTap: () => Get.to(ScreenViewStudent(
-                                  imagePath: data.image,
-                                    name: data.name,
-                                    age: data.age,
-                                    classs: data.classs,
-                                    gender: data.gender)),
-                                child: StudentListWidget(
-                                  name: data.name,
-                                  gender: data.gender,
-                                  id: data.key,
-                                  imagePath: data.image,
-                                  classs: data.classs,
-                                  age: data.age,
-                                ));
-                          }) : Center(child: Text("NO MATCHING STUDENT FOUND!!!"),) : Center(child: Text("SEARCH FOR STUDENTS..."),)
-            )
+              // If search has been made, but no results found
+              if (studentController.searchResults.isEmpty) {
+                return Center(child: Text("NO MATCHING STUDENT FOUND!!!"));
+              }
+
+              return ListView.builder(
+                  itemCount: studentController.searchResults.length,
+                  itemBuilder: (context, index) {
+                    //data
+                    final data = studentController.searchResults[index];
+                    return InkWell(
+                        onTap: () => Get.to(ScreenViewStudent(
+                            imagePath: data.image,
+                            name: data.name,
+                            age: data.age,
+                            classs: data.classs,
+                            gender: data.gender)),
+                        child: StudentListWidget(
+                          name: data.name,
+                          gender: data.gender,
+                          id: data.key,
+                          imagePath: data.image,
+                          classs: data.classs,
+                          age: data.age,
+                        ));
+                  });
+            }))
           ],
         ));
   }

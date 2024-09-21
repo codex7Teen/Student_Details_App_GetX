@@ -41,6 +41,10 @@ TextEditingController _genderController = TextEditingController();
 final formKey = GlobalKey<FormState>();
 
 class _ScreenAddStudentState extends State<ScreenAddStudent> {
+  
+  //! injecting studentcontroller
+  final StudentController studentController = Get.find<StudentController>();
+
   File? imageFile;
 
   //! pick image function
@@ -221,9 +225,9 @@ class _ScreenAddStudentState extends State<ScreenAddStudent> {
 
                               if (widget.addOrUpdate == 'Add Student') {
                                 // Add Student
-                                await StudentDbFunctions.addStudentDetails(data);      
+                                await studentController.addStudentDetails(data);      
                               } else {
-                                await StudentDbFunctions.updateStudent(widget.studentId!, data);
+                                await studentController.updateStudent(widget.studentId!, data);
                               }
 
                               Get.back();

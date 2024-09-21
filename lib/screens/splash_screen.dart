@@ -16,11 +16,18 @@ class ScreenSplash extends StatefulWidget {
 
 class _ScreenSplashState extends State<ScreenSplash> {
 
+  //! Injecting the studentController
+  final StudentController studentController = Get.put(StudentController());
+
   @override
   void initState() {
     super.initState();
-    StudentDbFunctions.getStudentDetails();
-    Timer(Duration(seconds: 3), () => Get.off(ScreenHome())); 
+    // Fetch student details
+    studentController.getStudentDetails();
+    // Navigete to home after 3 secs
+    Future.delayed(Duration(seconds: 3), () {
+      Get.off(ScreenHome());
+    });
   }
 
   @override

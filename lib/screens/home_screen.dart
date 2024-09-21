@@ -15,19 +15,13 @@ class ScreenHome extends StatefulWidget {
   State<ScreenHome> createState() => _ScreenHomeState();
 }
 
-bool changeIcon = true;
-
 class _ScreenHomeState extends State<ScreenHome> {
-
-  @override
-  void initState() {
-    super.initState();
-    StudentDbFunctions.getStudentDetails();
-  }
+  //! Injecting the StudentController
+  final StudentController studentController = Get.find<StudentController>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold( 
         floatingActionButton: FloatingActionButton(
             backgroundColor: Colors.yellow,
             child: Icon(Icons.add, color: Colors.black),
@@ -42,13 +36,16 @@ class _ScreenHomeState extends State<ScreenHome> {
           color: Colors.black,
         ),
           leading: InkWell(
-            onTap: () {
-              setState(() {
-                changeIcon = !changeIcon;
-              });
-              changeIcon ? Get.changeTheme(ThemeData.light()) : Get.changeTheme(ThemeData.dark());
+            onTap: () { 
+                // calling function to toggle the darkmode bool which is set as observable
+                studentController.changeDarkmodeBool();
+                // getX listens to the boolchange automatically and rebuilds ui automaticlly
+              studentController.darkModeToggle.value ? Get.changeTheme(ThemeData.light()) : Get.changeTheme(ThemeData.dark());
             },
-            child: changeIcon ? Icon(Icons.dark_mode_outlined, color: Colors.black,) :  Icon(Icons.light_mode_rounded,color: Colors.black)),
+            // wrapping with obx to rebuild the icon when the obs-bool change
+            child: Obx(() {
+              return studentController.darkModeToggle.value ? Icon(Icons.dark_mode_outlined, color: Colors.black,) :  Icon(Icons.light_mode_rounded,color: Colors.black);
+            }) ),
           backgroundColor: Colors.yellow[300],
           title: Text(
             'Student Details',
@@ -65,37 +62,34 @@ class _ScreenHomeState extends State<ScreenHome> {
           ],
         ),
         //! body
-        body: studentListNotifier.value.isNotEmpty
-            ? Padding(
+        body: Obx(() {
+          if(studentController.studentList.isEmpty) {
+            return Center(child: Text("NO STUDENT DATA"));
+          }
+          return Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: ValueListenableBuilder(
-                  valueListenable: studentListNotifier,
-                  builder: (context, studentList, child) {
-                    return ListView.builder(
-                        itemCount: studentList.length,
-                        itemBuilder: (context, index) {
-                          //data
-                          final data = studentList[index];
-                          return InkWell(
-                              onTap: () => Get.to(ScreenViewStudent(
-                                imagePath: data.image,
-                                  name: data.name,
-                                  age: data.age,
-                                  classs: data.classs,
-                                  gender: data.gender)),
-                              child: StudentListWidget(
-                                name: data.name,
-                                gender: data.gender,
-                                id: data.key,
-                                imagePath: data.image,
-                                age: data.age,
-                                classs: data.classs,
-                              ));
-                        });
-                  },
-                ))
-            : Center(
-                child: Text("NO STUDENT DATA"),
-              ));
+                child: ListView.builder(
+                    itemCount: studentController.studentList.length,
+                    itemBuilder: (context, index) {
+                      //data
+                      final data = studentController.studentList[index];
+                      return InkWell(
+                          onTap: () => Get.to(ScreenViewStudent(
+                            imagePath: data.image,
+                              name: data.name,
+                              age: data.age,
+                              classs: data.classs,
+                              gender: data.gender)),
+                          child: StudentListWidget(
+                            name: data.name,
+                            gender: data.gender,
+                            id: data.key,
+                            imagePath: data.image,
+                            age: data.age,
+                            classs: data.classs,
+                          ));
+                    }));
+        })
+   );
   }
 }
