@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:student_details_getx/db/student_db.dart';
-import 'package:student_details_getx/model/student_model.dart';
 import 'package:student_details_getx/screens/view_student.dart';
 import 'package:student_details_getx/widgets/student_list_widget.dart';
 

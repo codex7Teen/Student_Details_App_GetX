@@ -48,7 +48,7 @@ class _ScreenHomeState extends State<ScreenHome> {
             }) ),
           backgroundColor: Colors.yellow[300],
           title: Text(
-            'Student Details',
+            'Student Details Using GetX',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
           ),
           centerTitle: true,
